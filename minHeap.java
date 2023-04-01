@@ -3,11 +3,14 @@ class minHeapNode{
     int rideNumber;
     int rideCost;
     int tripDuration;
+    RBTNode rbtPointer;
+
 
     minHeapNode(int rideNumber, int rideCost, int tripDuration){
         this.rideNumber = rideNumber;
         this.rideCost = rideCost;
         this.tripDuration = tripDuration;
+        rbtPointer = null;
     }
 
     public String toString(){
@@ -17,13 +20,13 @@ class minHeapNode{
 }
 
 
-public class minHeap{
+public class MinHeap{
 
 
     minHeapNode minHeap[];
     int size;
 
-    minHeap(){
+    MinHeap(){
         // Maximum size of the heap can be atmost 2000 as per the question
         minHeap = new minHeapNode[2001];
         size = 0;
@@ -81,9 +84,9 @@ public class minHeap{
         minHeap[node2] = temp;
     }
 
-    public void insert(int rideNumber, int rideCost, int tripDuration){
+    public void insert(minHeapNode newNode){
 
-        minHeapNode newNode = new minHeapNode(rideNumber, rideCost, tripDuration);
+        //minHeapNode newNode = new minHeapNode(rideNumber, rideCost, tripDuration);
         minHeap[size] = newNode;
         int currentIndex = size;
         while((minHeap[currentIndex].rideCost < getParentNode(currentIndex).rideCost) || (minHeap[currentIndex].rideCost == getParentNode(currentIndex).rideCost && minHeap[currentIndex].tripDuration < getParentNode(currentIndex).tripDuration) ){
@@ -143,6 +146,27 @@ public class minHeap{
         size = size - 1;
         heapify(0);
         return root;
+    }
+
+    public void removeNode(minHeapNode node){
+
+        // If the node is the last node in the heap then just remove it
+        if(size == 1){
+            size = size - 1;
+            return;
+        }
+
+        // If the node is not the last node in the heap then swap it with the last node and heapify
+        minHeapNode lastNode = minHeap[size-1];
+        node.rideNumber = lastNode.rideNumber;
+        node.rideCost = lastNode.rideCost;
+        node.tripDuration = lastNode.tripDuration;
+        node.rbtPointer = lastNode.rbtPointer;
+
+        // Change the rbt pointer also
+        lastNode.rbtPointer.heapNode = node;
+        size = size - 1;
+        heapify(0);
     }
 
     // Remove this function adithya

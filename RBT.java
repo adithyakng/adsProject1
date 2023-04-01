@@ -61,7 +61,6 @@ class RBT {
                 currentNode = currentNode.right;
             }
         }
-        RBTNode newNode = new RBTNode(rideNumber, rideCost, tripDuration, RBTNode.red,externalNode);
         if(currentParent == null){
             // This is the first node that is being inserted so point it to the root
             root = newNode;
@@ -413,6 +412,22 @@ class RBT {
         }
       }
       return false;
+    }
+
+    public RBTNode getNodeFromRideNumber(int rideNumber){
+      RBTNode currentNode = root;
+      while(currentNode != RBT.externalNode){
+        if(rideNumber == currentNode.rideNumber){
+          return currentNode;
+        }
+        else if(rideNumber < currentNode.rideNumber){
+          currentNode = currentNode.left;
+        }
+        else{
+          currentNode = currentNode.right;
+        }
+      }
+      return null;
     }
 
     public static void main(String args[]){
