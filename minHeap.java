@@ -3,6 +3,7 @@ class minHeapNode{
     int rideNumber;
     int rideCost;
     int tripDuration;
+    int index;
     RBTNode rbtPointer;
 
 
@@ -14,7 +15,7 @@ class minHeapNode{
     }
 
     public String toString(){
-        return rideNumber+" "+rideCost+" "+tripDuration;
+        return index+" "+rideNumber+" "+rideCost+" "+tripDuration;
     }
 
 }
@@ -81,13 +82,16 @@ public class MinHeap{
     public void swapNodes(int node1, int node2){
         minHeapNode temp = minHeap[node1];
         minHeap[node1] = minHeap[node2];
+        minHeap[node1].index = node1;
         minHeap[node2] = temp;
+        minHeap[node2].index = node2;
     }
 
     public void insert(minHeapNode newNode){
 
         //minHeapNode newNode = new minHeapNode(rideNumber, rideCost, tripDuration);
         minHeap[size] = newNode;
+        newNode.index = size;
         int currentIndex = size;
         while((minHeap[currentIndex].rideCost < getParentNode(currentIndex).rideCost) || (minHeap[currentIndex].rideCost == getParentNode(currentIndex).rideCost && minHeap[currentIndex].tripDuration < getParentNode(currentIndex).tripDuration) ){
             swapNodes(currentIndex, getParentIndex(currentIndex));
@@ -166,7 +170,7 @@ public class MinHeap{
         // Change the rbt pointer also
         lastNode.rbtPointer.heapNode = node;
         size = size - 1;
-        heapify(0);
+        heapify(node.index);
     }
 
     // Remove this function adithya

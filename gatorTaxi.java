@@ -7,15 +7,17 @@ public class gatorTaxi {
         MinHeap mHeap = new MinHeap();
         RBT rbt = new RBT();
 
-        // insert(1, 10, 10, mHeap, rbt);
-        // insert(2, 9, 1, mHeap, rbt);
-        // insert(3, 8, 2, mHeap, rbt);
-        // insert(4, 7, 3, mHeap, rbt);
-        // insert(5, 6, 4, mHeap, rbt);
-        // insert(0, 8, 1, mHeap, rbt);
+        insert(1, 10, 10, mHeap, rbt);
+        insert(2, 9, 1, mHeap, rbt);
+        insert(3, 25, 2, mHeap, rbt);
+        insert(4, 7, 3, mHeap, rbt);
+        insert(5, 6, 4, mHeap, rbt);
+        insert(0, 8, 1, mHeap, rbt);
+        insert(9, 14, 1, mHeap, rbt);
         // RBT.prettyPrint(rbt.root);
-        // mHeap.print();
-        // cancelRide(0, mHeap, rbt);
+        mHeap.print();
+        cancelRide(4, mHeap, rbt);
+        mHeap.print();
         // RBT.prettyPrint(rbt.root);
         // mHeap.print();
         // System.out.println(printRideNumberWithInRange(2, 5, new ArrayList<RBTNode>(), rbt.root));
