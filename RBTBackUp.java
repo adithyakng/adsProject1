@@ -1,4 +1,4 @@
-class RBTNode{
+class RBTNode1{
 
     final static int black = 1;
     final static int red = 0;
@@ -14,14 +14,14 @@ class RBTNode{
 
     int colour;
 
-    RBTNode(){
+    RBTNode1(){
       left = null;
       right = null;
       parent = null;
       colour = RBTNode.black;
     }
 
-    RBTNode(int rideNumber, int rideCost, int tripDuration, int colour, RBTNode externalNode){
+    RBTNode1(int rideNumber, int rideCost, int tripDuration, int colour, RBTNode externalNode){
         this.rideCost = rideCost;
         this.rideNumber = rideNumber;
         this.tripDuration = tripDuration;
