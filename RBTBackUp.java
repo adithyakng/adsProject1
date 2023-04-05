@@ -10,6 +10,7 @@ class RBTNode{
     RBTNode left;
     RBTNode right;
     RBTNode parent;
+    minHeapNode heapNode;
 
     int colour;
 
@@ -27,7 +28,7 @@ class RBTNode{
         this.colour = colour;
         this.left = externalNode;
         this.right = externalNode;
-        this.parent = externalNode;
+        this.parent = null;
     }
 
     public String toString(){
@@ -35,34 +36,31 @@ class RBTNode{
     }
 }
 
-class RBT1 {
+class RBT {
 
     RBTNode root = null;
     static RBTNode externalNode = null;
 
-    RBT1(){
+    RBT(){
       if(externalNode == null){
         externalNode = new RBTNode();
         root = externalNode;
       }
     }
-    public void insert(int rideNumber, int rideCost, int tripDuration){
+    public void insert(RBTNode newNode){
 
         RBTNode currentNode = root;
         RBTNode currentParent = null;
 
         while(currentNode != externalNode){
             currentParent = currentNode;
-            if(currentNode.rideNumber > rideNumber){
+            if(currentNode.rideNumber > newNode.rideNumber){
                 currentNode = currentNode.left;
             }
-            else if(currentNode.rideNumber < rideNumber){
+            else if(currentNode.rideNumber < newNode.rideNumber){
                 currentNode = currentNode.right;
             }
         }
-
-        RBTNode newNode = new RBTNode(rideNumber, rideCost, tripDuration, RBTNode.red,externalNode);
-        
         if(currentParent == null){
             // This is the first node that is being inserted so point it to the root
             root = newNode;
@@ -70,7 +68,7 @@ class RBT1 {
             root.colour = RBTNode.black;
             return;
         }
-        else if(currentParent.rideNumber > rideNumber){
+        else if(currentParent.rideNumber > newNode.rideNumber){
             currentParent.left = newNode;
         }
         else{
@@ -143,7 +141,7 @@ class RBT1 {
         RBTNode parentNode = node.parent;
 
         node.left = leftChildNode.right;
-        if(leftChildNode.right != RBT1.externalNode){
+        if(leftChildNode.right != RBT.externalNode){
           leftChildNode.right.parent = node;
         }
 
@@ -151,7 +149,7 @@ class RBT1 {
         leftChildNode.parent = parentNode;
         node.parent = leftChildNode;
 
-        if(parentNode == RBT1.externalNode){
+        if(parentNode == null){
           root = leftChildNode;
         }
         else if(parentNode.left == node){
@@ -169,15 +167,13 @@ class RBT1 {
         RBTNode parentNode = node.parent;
 
         node.right = rightChildNode.left;
-        if(rightChildNode.left != RBT1.externalNode){
+        if(rightChildNode.left != RBT.externalNode){
           rightChildNode.left.parent = node;
         }
 
-        rightChildNode.left = node;
-        rightChildNode.parent = parentNode;
-        node.parent = rightChildNode;
         
-        if(parentNode == RBT1.externalNode){
+        rightChildNode.parent = parentNode;
+        if(parentNode == null){
           root = rightChildNode;
         }
         else if(parentNode.left == node){
@@ -186,6 +182,8 @@ class RBT1 {
         else{
           parentNode.right = rightChildNode;
         }
+        rightChildNode.left = node;
+        node.parent = rightChildNode;
         
     }
 
@@ -222,7 +220,7 @@ class RBT1 {
 
     public RBTNode inOrderSuccessor(RBTNode node){
       
-        while(node.left != RBT1.externalNode){
+        while(node.left != RBT.externalNode){
           node = node.left;
         }
         return node;
@@ -237,7 +235,7 @@ class RBT1 {
         RBTNode delNode = null;
         RBTNode currentNode = root;
 
-        while(currentNode != RBT1.externalNode){
+        while(currentNode != RBT.externalNode){
           if(currentNode.rideNumber == rideNumber){
             delNode = currentNode;
             break;
@@ -256,8 +254,9 @@ class RBT1 {
         }
         int delNodeColour = delNode.colour;
         RBTNode successorRightChild = null;
-        if(delNode.left == RBT1.externalNode){
+        if(delNode.left == RBT.externalNode){
           // No left child condition
+          successorRightChild = delNode.right;
           if(delNode.parent == null){
             root = delNode.right;
           }
@@ -269,8 +268,9 @@ class RBT1 {
           }
           delNode.right.parent = delNode.parent;
         }
-        else if(delNode.right == RBT1.externalNode){
+        else if(delNode.right == RBT.externalNode){
           // No right child condition
+          successorRightChild = delNode.left;
           if(delNode.parent == null){
             root = delNode.left;
           }
@@ -325,23 +325,122 @@ class RBT1 {
         }
 
         if(delNodeColour == RBTNode.black){
-          //fixDeleteCases(successorRightChild);
+          fixDeleteCases(successorRightChild);
         }
-        
+    }
 
+    public void fixDeleteCases(RBTNode fNode){
+      RBTNode siblingNode;
+      while(fNode.colour != RBTNode.red && fNode != root ){
+        
+        // Double black node is the left node of the parent
+        if(fNode.parent.left == fNode){
+          siblingNode = fNode.parent.right;
+
+          if(siblingNode.colour == RBTNode.red){
+            siblingNode.colour = RBTNode.black;
+            fNode.parent.colour = RBTNode.red;
+            rotateLeft(fNode.parent);
+            siblingNode = fNode.parent.right;
+          }
+
+          if(siblingNode.left.colour != RBTNode.red && siblingNode.right.colour != RBTNode.red){
+            // Both the children of sibling are black
+            siblingNode.colour = RBTNode.red;
+            fNode = fNode.parent;
+          }
+          else {
+            if(siblingNode.right.colour == RBTNode.black){
+              siblingNode.left.colour = RBTNode.black;
+              siblingNode.colour = RBTNode.red;
+              rotateRight(siblingNode);
+              siblingNode = fNode.parent.right;
+            }
+
+            siblingNode.colour = fNode.parent.colour;
+            fNode.parent.colour = RBTNode.black;
+            siblingNode.right.colour = RBTNode.black;
+            rotateLeft(fNode.parent);
+            fNode = root;
+          }
+        }
+        // Double black node is the right node of the parent, mirror cases of the above
+        else{
+          siblingNode = fNode.parent.left;
+          if(siblingNode.colour == RBTNode.red){
+            siblingNode.colour = RBTNode.black;
+            fNode.parent.colour = RBTNode.red;
+            rotateRight(fNode.parent);
+            siblingNode = fNode.parent.left;
+          }
+          if(siblingNode.right.colour != RBTNode.red && siblingNode.left.colour != RBTNode.red){
+            siblingNode.colour = RBTNode.red;
+            fNode = fNode.parent;
+          }
+          else{
+            if(siblingNode.left.colour == RBTNode.black){
+              siblingNode.right.colour = RBTNode.black;
+              siblingNode.colour = RBTNode.red;
+              rotateLeft(siblingNode);
+              siblingNode = fNode.parent.left;
+            }
+
+            siblingNode.colour = fNode.parent.colour;
+            fNode.parent.colour = RBTNode.black;
+            siblingNode.right.colour = RBTNode.black;
+            rotateRight(fNode.parent);
+            fNode = root;
+          }
+        }
+      }
+
+      // Finally set the colour of the node to black
+      fNode.colour = RBTNode.black;
+    }
+
+    public boolean checkRideNumber(int rideNumber){
+      RBTNode currentNode = root;
+      while(currentNode != RBT.externalNode){
+        if(rideNumber == currentNode.rideNumber){
+          return true;
+        }
+        else if(rideNumber < currentNode.rideNumber){
+          currentNode = currentNode.left;
+        }
+        else{
+          currentNode = currentNode.right;
+        }
+      }
+      return false;
+    }
+
+    public RBTNode getNodeFromRideNumber(int rideNumber){
+      RBTNode currentNode = root;
+      while(currentNode != RBT.externalNode){
+        if(rideNumber == currentNode.rideNumber){
+          return currentNode;
+        }
+        else if(rideNumber < currentNode.rideNumber){
+          currentNode = currentNode.left;
+        }
+        else{
+          currentNode = currentNode.right;
+        }
+      }
+      return null;
     }
 
     public static void main(String args[]){
-        RBT1 r = new RBT1();
+        RBT r = new RBT();
 
-        r.insert(10, 1, 2);
-        r.insert(20,2,3);
-        r.insert(15,5,3);
-        r.insert(2,1,3);
-        r.insert(25,14,13);
-        r.insert(13,5,12);
+        // r.insert(10, 1, 2);
+        // r.insert(20,2,3);
+        // r.insert(15,5,3);
+        // r.insert(2,1,3);
+        // r.insert(25,14,13);
+        // r.insert(13,5,12);
 
-        r.delete(13);
+        r.delete(20);
         prettyPrint(r.root);
    }
     

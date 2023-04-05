@@ -46,7 +46,10 @@ public class MinHeap{
     }
 
     public int getParentIndex(int index){
-        return (index/2);
+        if(index == 0){
+            return 0;
+        }
+        return (index % 2) == 0 ? (index - 2)/2 : (index - 1)/2;
     }
 
     public int getLeftChildIndex(int index){
@@ -59,7 +62,7 @@ public class MinHeap{
 
     public boolean isNodeALeaf(int index){
 
-        if((((2*index)+1) >= size) || (((2*index)+2) >= size)){
+        if(!hasLeftChild(index) && !hasRightChild(index)){
             return true;
         }
         return false;
@@ -176,7 +179,7 @@ public class MinHeap{
     // Remove this function adithya
 
     // public static void main(String[] args) {
-    //         minHeap m = new minHeap();
+    //         MinHeap m = new MinHeap();
     //         m.insert(5, 4, 2);
     //         m.insert(6, 4, 3);
     //         m.insert(7, 4, 1);

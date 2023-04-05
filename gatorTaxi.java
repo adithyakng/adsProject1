@@ -1,29 +1,66 @@
 import java.util.ArrayList;
+import java.io.*;
 
 public class gatorTaxi {
     
-    public static void main(String args[]){
+    public static void main(String args[]) throws IOException{
         // Create a minHeap and RBT Tree
         MinHeap mHeap = new MinHeap();
         RBT rbt = new RBT();
+        File inputFile = new File("b.txt"); // change the file name here adithya
+        BufferedReader inputReader = new BufferedReader(new InputStreamReader( new FileInputStream(inputFile)));
+        //String input[] = "Print(a,b,c)".split("\\(");
+        String inputLine;
+        while(true){
+            inputLine = inputReader.readLine();
+            if(inputLine == null){
+                break;
+            }
+            String input[] = inputLine.split("\\(");
+            String subInput[];
+            String nextRideReturn;
+            boolean insertSuccess;
+            switch(input[0]){
+                case "Print":
+                    subInput = input[1].split("\\,");
+                    if(subInput.length == 1){
+                        // Print function for single ride number
+                        int rideNumber = Integer.valueOf(subInput[0].split("\\)")[0]);
+                        System.out.println(printRideNumber(rideNumber,rbt));
 
-        insert(1, 10, 10, mHeap, rbt);
-        insert(2, 9, 1, mHeap, rbt);
-        insert(3, 25, 2, mHeap, rbt);
-        insert(4, 7, 3, mHeap, rbt);
-        insert(5, 6, 4, mHeap, rbt);
-        insert(0, 8, 1, mHeap, rbt);
-        insert(9, 14, 1, mHeap, rbt);
-        // RBT.prettyPrint(rbt.root);
-        mHeap.print();
-        cancelRide(4, mHeap, rbt);
-        mHeap.print();
-        // RBT.prettyPrint(rbt.root);
-        // mHeap.print();
-        // System.out.println(printRideNumberWithInRange(2, 5, new ArrayList<RBTNode>(), rbt.root));
-        // System.out.println(getNextRide(mHeap, rbt));
-        // RBT.prettyPrint(rbt.root);
-        // System.out.println(getNextRide(mHeap, rbt));
+                    }
+                    else{
+                        // Print function for range of rideNumbers
+                        System.out.println("Multi Return called");
+                        //ArrayList<RBTNode> al =  printRideNumberWithInRange(Integer.valueOf(subInput[0]),Integer.valueOf(subInput[1]),new ArrayList<RBTNode>(),rbt.root);
+
+                    }
+                break;
+                case "Insert":
+                    subInput = input[1].split("\\,");
+                    insertSuccess = insert(Integer.parseInt(subInput[0]),Integer.parseInt(subInput[1]), Integer.parseInt(subInput[2].split("\\)")[0]), mHeap, rbt);
+                    if(!insertSuccess){
+                        System.out.println("Duplicate RideNumber");
+                        return;
+                    }
+                break;
+                case "UpdateTrip":
+                    subInput = input[1].split("\\,");
+                    updateTripDuration(Integer.parseInt(subInput[0]), Integer.parseInt(subInput[1].split("\\)")[0]), rbt, mHeap);
+                break;
+                case "CancelRide":
+                    cancelRide(Integer.parseInt(input[1].split("\\)")[0]), mHeap, rbt);
+                break;
+                case "GetNextRide":
+                    nextRideReturn = getNextRide(mHeap, rbt);
+                    System.out.println(nextRideReturn);
+                break;
+                default:
+                    break;
+            }
+        }
+        inputReader.close();
+        
     }
 
     public static boolean insert(int rideNumber, int rideCost, int tripDuration, MinHeap mHeap, RBT rbt){
@@ -87,7 +124,7 @@ public class gatorTaxi {
 
         // Remove min and remove the curresponding node from the RBT tree and return the node details
         minHeapNode minNode = mHeap.removeMin();
-        rbt.delete(minNode.rideNumber);
+        rbt.deleteRBTNode(minNode.rideNumber);
         return "("+minNode.rideNumber+","+minNode.rideCost+","+minNode.tripDuration+")";
     }
 
@@ -101,7 +138,7 @@ public class gatorTaxi {
         }
         minHeapNode cancelHeapNode = cancelNode.heapNode;
         // Remove the node from the minHeap and RBT tree
-        rbt.delete(rideNumber);
+        rbt.deleteRBTNode(rideNumber);
         mHeap.removeNode(cancelHeapNode);
     }
 
@@ -110,10 +147,17 @@ public class gatorTaxi {
         // First check and get the rideNumber if it is present in the RBT tree
 
         RBTNode updateNode = rbt.getNodeFromRideNumber(rideNumber);
-        if(updateNode == null || updateNode.tripDuration >= modifiedTripDuration){
-            /* The rideNumber is not present in the RBT tree  or if the the tripDuration is 
+        if(updateNode == null){
+            // The rideNumber is not present in the RBT tree return
+            return;
+        }
+        if(updateNode.tripDuration >= modifiedTripDuration){
+            /* if the the tripDuration is 
                 already greater than the new modifiedTripDuration do nothing
             */
+            updateNode.tripDuration = modifiedTripDuration;
+            updateNode.heapNode.tripDuration = modifiedTripDuration;
+            mHeap.heapify(updateNode.heapNode.index);
             return;
         }
         else if((updateNode.tripDuration < modifiedTripDuration) && modifiedTripDuration <= 2*(updateNode.tripDuration)){

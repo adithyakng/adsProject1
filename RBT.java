@@ -22,13 +22,13 @@ class RBTNode{
     }
 
     RBTNode(int rideNumber, int rideCost, int tripDuration, int colour, RBTNode externalNode){
-        this.rideCost = rideCost;
-        this.rideNumber = rideNumber;
-        this.tripDuration = tripDuration;
-        this.colour = colour;
-        this.left = externalNode;
-        this.right = externalNode;
-        this.parent = externalNode;
+		this.rideCost = rideCost;
+		this.rideNumber = rideNumber;
+		this.tripDuration = tripDuration;
+		this.colour = colour;
+		this.left = externalNode;
+		this.right = externalNode;
+		this.parent = null;
     }
 
     public String toString(){
@@ -136,65 +136,50 @@ class RBT {
         }
     }
 
-    public void rotateRight(RBTNode node){
-        RBTNode leftChildNode = node.left;
-        RBTNode parentNode = node.parent;
-
-        node.left = leftChildNode.right;
-        if(leftChildNode.right != RBT.externalNode){
-          leftChildNode.right.parent = node;
-        }
-
-        leftChildNode.right = node;
-        leftChildNode.parent = parentNode;
-        node.parent = leftChildNode;
-
-        if(parentNode == RBT.externalNode){
-          root = leftChildNode;
-        }
-        else if(parentNode.left == node){
-          parentNode.left = leftChildNode;
-        }
-        else{
-          parentNode.right = leftChildNode;
-        }
-        
-        
+    public void rotateRight(RBTNode node) {
+     	RBTNode leftChildNode = node.left;
+		node.left = leftChildNode.right;
+		if (leftChildNode.right != RBT.externalNode) {
+			leftChildNode.right.parent = node;
+		}
+		leftChildNode.parent = node.parent;
+		if (node.parent == null) {
+			root = leftChildNode;
+		} else if (node == node.parent.right) {
+			node.parent.right = leftChildNode;
+		} else {
+			node.parent.left = leftChildNode;
+		}
+		leftChildNode.right = node;
+		node.parent = leftChildNode;
     }
 
-    public void rotateLeft(RBTNode node){
-        RBTNode rightChildNode = node.right;
-        RBTNode parentNode = node.parent;
-
-        node.right = rightChildNode.left;
-        if(rightChildNode.left != RBT.externalNode){
-          rightChildNode.left.parent = node;
-        }
-
-        rightChildNode.left = node;
-        rightChildNode.parent = parentNode;
-        node.parent = rightChildNode;
-        
-        if(parentNode == RBT.externalNode){
-          root = rightChildNode;
-        }
-        else if(parentNode.left == node){
-          parentNode.left = rightChildNode;
-        }
-        else{
-          parentNode.right = rightChildNode;
-        }
-        
+    public void rotateLeft(RBTNode node) {
+		RBTNode rightChildNode = node.right;
+		node.right = rightChildNode.left;
+		if (rightChildNode.left != RBT.externalNode) {
+			rightChildNode.left.parent = node;
+		}
+		rightChildNode.parent = node.parent;
+		if (node.parent == null) {
+			root = rightChildNode;
+		} else if (node == node.parent.left) {
+			node.parent.left = rightChildNode;
+		} else {
+			node.parent.right = rightChildNode;
+		}
+		rightChildNode.left = node;
+		node.parent = rightChildNode;
     }
 
 
-    public RBTNode getUncleNode(RBTNode parent){
+    public RBTNode getUncleNode(RBTNode node){
         
-        if(parent.parent.left == parent){
-            return parent.parent.right;
+        if(node.parent.left == node){
+            return node.parent.right;
         }
-        else if(parent.parent.right == parent){
-            return parent.parent.left;
+        else if(node.parent.right == node){
+            return node.parent.left;
         }
         return null;
     }
@@ -230,172 +215,167 @@ class RBT {
       printHelper(root, "", true);
     }
 
-    public void delete(int rideNumber){
+    public void deleteRBTNode(int rideNumber){
        
-        RBTNode delNode = null;
-        RBTNode currentNode = root;
+		RBTNode deleteNode = RBT.externalNode;
+		RBTNode currentNode = root;
+		while (currentNode != RBT.externalNode){
+			if (currentNode.rideNumber == rideNumber) {
+				deleteNode = currentNode;
+			}
 
-        while(currentNode != RBT.externalNode){
-          if(currentNode.rideNumber == rideNumber){
-            delNode = currentNode;
-            break;
-          }
-          else if(currentNode.rideNumber > rideNumber){
-            currentNode = currentNode.left;
-          }
-          else{
-            currentNode = currentNode.right;
-          }
-        }
+			if (currentNode.rideNumber < rideNumber) {
+				currentNode = currentNode.right;
+			} 
+			else {
+				currentNode = currentNode.left;
+			}
+		}
 
-        if(delNode == null){
-          // Node not present in the RBTree, ignore the delete operation
-          return;
-        }
-        int delNodeColour = delNode.colour;
-        RBTNode successorRightChild = null;
-        if(delNode.left == RBT.externalNode){
-          // No left child condition
-          successorRightChild = delNode.right;
-          if(delNode.parent == null){
-            root = delNode.right;
-          }
-          else if(delNode == delNode.parent.left){
-            delNode.parent.left = delNode.right;
-          }
-          else{
-            delNode.parent.right = delNode.right;
-          }
-          delNode.right.parent = delNode.parent;
-        }
-        else if(delNode.right == RBT.externalNode){
-          // No right child condition
-          successorRightChild = delNode.left;
-          if(delNode.parent == null){
-            root = delNode.left;
-          }
-          else if(delNode == delNode.parent.left){
-            delNode.parent.left = delNode.left;
-          }
-          else {
-            delNode.parent.right = delNode.left;
-          }
-          delNode.left.parent = delNode.parent;
-        }
-        else{
-          // Both left and right child present
-          RBTNode successor = inOrderSuccessor(delNode.right);
-
-          // As we are replacing the delete Node with inorder successor, change the colour of the delete node to the colour of the successor
-          delNodeColour = successor.colour;
-          successorRightChild = successor.right;
-          if(successor.parent == delNode){
-            successorRightChild.parent = successor;
-          }
-          else{
-            if(successor.parent == null){
-              root = successorRightChild;
-            }
-            else if(successor == successor.parent.left){
-              successor.parent.left = successorRightChild;
-            }
-            else{
-              successor.parent.right = successorRightChild;
-            }
-            successorRightChild.parent = successor.parent;
-            successor.right = delNode.right;
-            successor.right.parent = successor;
-          }
-
-          // u is delNode
-          // v is successor
-          if(delNode.parent == null){
-            root = successor;
-          }
-          else if(delNode == delNode.parent.left){
-            delNode.parent.left = successor;
-          }
-          else{
-            delNode.parent.right = successor;
-          }
-          successor.parent = delNode.parent;
-          successor.left = delNode.left;
-          successor.left.parent = successor;
-          successor.colour = delNode.colour;
-        }
-
-        if(delNodeColour == RBTNode.black){
-          fixDeleteCases(successorRightChild);
-        }
+		// Node not present in the RBTree, ignore the delete operation
+		if (deleteNode == RBT.externalNode) {
+			return;
+		} 
+		
+		int deleteNodeColour = deleteNode.colour;
+      	RBTNode replacementNode;
+		// if no left child
+		if (deleteNode.left == RBT.externalNode) {
+			replacementNode = deleteNode.right;
+			if (deleteNode.parent == null) {
+				root = deleteNode.right;
+			} 
+			else if (deleteNode == deleteNode.parent.left){
+				deleteNode.parent.left = deleteNode.right;
+			} 
+			else {
+				deleteNode.parent.right = deleteNode.right;
+			}
+			deleteNode.right.parent = deleteNode.parent;
+		} 
+		// If no right child
+		else if (deleteNode.right == RBT.externalNode) {
+			replacementNode = deleteNode.left;
+			if (deleteNode.parent == null) {
+				root = deleteNode.left;
+			} 
+			else if (deleteNode == deleteNode.parent.left){
+				deleteNode.parent.left = deleteNode.left;
+			} 
+			else {
+				deleteNode.parent.right = deleteNode.left;
+			}
+			deleteNode.left.parent = deleteNode.parent;
+		} 
+		// If deleteNode is an internal Node
+		else {
+			RBTNode inOrderSuccessor = inOrderSuccessor(deleteNode.right);
+			deleteNodeColour = inOrderSuccessor.colour;
+			replacementNode = inOrderSuccessor.right;
+			if (inOrderSuccessor.parent == deleteNode) {
+				replacementNode.parent = inOrderSuccessor;
+			} 
+			else {
+				if (inOrderSuccessor.parent == null) {
+					root = inOrderSuccessor.right;
+				} 
+				else if (inOrderSuccessor == inOrderSuccessor.parent.left){
+					inOrderSuccessor.parent.left = inOrderSuccessor.right;
+				} 
+				else {
+					inOrderSuccessor.parent.right = inOrderSuccessor.right;
+				}
+				inOrderSuccessor.right.parent = inOrderSuccessor.parent;
+				inOrderSuccessor.right = deleteNode.right;
+				inOrderSuccessor.right.parent = inOrderSuccessor;
+			}
+			if (deleteNode.parent == null) {
+				root = inOrderSuccessor;
+			} else if (deleteNode == deleteNode.parent.left){
+				deleteNode.parent.left = inOrderSuccessor;
+			} 
+			else {
+				deleteNode.parent.right = inOrderSuccessor;
+			}
+			inOrderSuccessor.parent = deleteNode.parent;
+			inOrderSuccessor.left = deleteNode.left;
+			inOrderSuccessor.left.parent = inOrderSuccessor;
+			inOrderSuccessor.colour = deleteNode.colour;
+		}
+      if (deleteNodeColour == RBTNode.black){
+        fixRBTreeDelete(replacementNode);
+      }
     }
 
-    public void fixDeleteCases(RBTNode fNode){
-      RBTNode siblingNode;
-      while(fNode.colour != RBTNode.red && fNode != root ){
-        
-        // Double black node is the left node of the parent
-        if(fNode.parent.left == fNode){
-          siblingNode = fNode.parent.right;
+    public void fixRBTreeDelete(RBTNode fNode){
+		RBTNode siblingNode;
+		while (fNode.colour != RBTNode.red && fNode != root) {
+			if(fNode == fNode.parent.right) {
+				siblingNode = fNode.parent.left;
+				if (siblingNode.colour != RBTNode.black) {
+					// case 3.RBTNode.red
+					siblingNode.colour = RBTNode.black;
+					fNode.parent.colour = RBTNode.red;
+					rotateRight(fNode.parent);
+					siblingNode = fNode.parent.left;
+				}
 
-          if(siblingNode.colour == RBTNode.red){
-            siblingNode.colour = RBTNode.black;
-            fNode.parent.colour = RBTNode.red;
-            rotateLeft(fNode.parent);
-            siblingNode = fNode.parent.right;
-          }
+				if (siblingNode.right.colour != RBTNode.red && siblingNode.left.colour != RBTNode.red) {
+					// case 3.2
+					siblingNode.colour = RBTNode.red;
+					fNode = fNode.parent;
+				} else {
+					if (siblingNode.left.colour == RBTNode.black) {
+						// case 3.3
+						siblingNode.right.colour = RBTNode.black;
+						siblingNode.colour = RBTNode.red;
+						rotateLeft(siblingNode);
+						siblingNode = fNode.parent.left;
+					} 
 
-          if(siblingNode.left.colour != RBTNode.red && siblingNode.right.colour != RBTNode.red){
-            // Both the children of sibling are black
-            siblingNode.colour = RBTNode.red;
-            fNode = fNode.parent;
-          }
-          else {
-            if(siblingNode.right.colour == RBTNode.black){
-              siblingNode.left.colour = RBTNode.black;
-              siblingNode.colour = RBTNode.red;
-              rotateRight(siblingNode);
-              siblingNode = fNode.parent.right;
-            }
+					// case 3.4
+					siblingNode.colour = fNode.parent.colour;
+					fNode.parent.colour = RBTNode.black;
+					siblingNode.left.colour = RBTNode.black;
+					rotateRight(fNode.parent);
+					fNode = root;
+				}
+			}
 
-            siblingNode.colour = fNode.parent.colour;
-            fNode.parent.colour = RBTNode.black;
-            siblingNode.right.colour = RBTNode.black;
-            rotateLeft(fNode.parent);
-            fNode = root;
-          }
-        }
-        // Double black node is the right node of the parent, mirror cases of the above
-        else{
-          siblingNode = fNode.parent.left;
-          if(siblingNode.colour == RBTNode.red){
-            siblingNode.colour = RBTNode.black;
-            fNode.parent.colour = RBTNode.red;
-            rotateRight(fNode.parent);
-            siblingNode = fNode.parent.left;
-          }
-          if(siblingNode.right.colour != RBTNode.red && siblingNode.left.colour != RBTNode.red){
-            siblingNode.colour = RBTNode.red;
-            fNode = fNode.parent;
-          }
-          else{
-            if(siblingNode.left.colour == RBTNode.black){
-              siblingNode.right.colour = RBTNode.black;
-              siblingNode.colour = RBTNode.red;
-              rotateLeft(siblingNode);
-              siblingNode = fNode.parent.left;
-            }
+			// Mirror cases of above code
+			else if (fNode == fNode.parent.left) {
+				siblingNode = fNode.parent.right;
+				if (siblingNode.colour != RBTNode.black) {
+					// case 3.RBTNode.red
+					siblingNode.colour = RBTNode.black;
+					fNode.parent.colour = RBTNode.red;
+					rotateLeft(fNode.parent);
+					siblingNode = fNode.parent.right;
+				}
 
-            siblingNode.colour = fNode.parent.colour;
-            fNode.parent.colour = RBTNode.black;
-            siblingNode.right.colour = RBTNode.black;
-            rotateRight(fNode.parent);
-            fNode = root;
-          }
-        }
-      }
+				if (siblingNode.left.colour != RBTNode.red && siblingNode.right.colour != RBTNode.red) {
+					// case 3.2
+					siblingNode.colour = RBTNode.red;
+					fNode = fNode.parent;
+				} else {
+					if (siblingNode.right.colour == RBTNode.black) {
+						// case 3.3
+						siblingNode.left.colour = RBTNode.black;
+						siblingNode.colour = RBTNode.red;
+						rotateRight(siblingNode);
+						siblingNode = fNode.parent.right;
+					} 
 
-      // Finally set the colour of the node to black
-      fNode.colour = RBTNode.black;
+					// case 3.4
+					siblingNode.colour = fNode.parent.colour;
+					fNode.parent.colour = RBTNode.black;
+					siblingNode.right.colour = RBTNode.black;
+					rotateLeft(fNode.parent);
+					fNode = root;
+				}
+			} 
+		}
+		fNode.colour = RBTNode.black;
     }
 
     public boolean checkRideNumber(int rideNumber){
@@ -440,7 +420,7 @@ class RBT {
         // r.insert(25,14,13);
         // r.insert(13,5,12);
 
-        r.delete(20);
+        r.deleteRBTNode(20);
         prettyPrint(r.root);
    }
     
