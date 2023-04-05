@@ -1,8 +1,8 @@
-import java.util.ArrayList;
 import java.io.*;
 
 public class gatorTaxi {
     
+    static int printCount = 0;
     public static void main(String args[]) throws IOException{
         // Create a minHeap and RBT Tree
         MinHeap mHeap = new MinHeap();
@@ -20,6 +20,7 @@ public class gatorTaxi {
             String subInput[];
             String nextRideReturn;
             boolean insertSuccess;
+            int returnCount;
             switch(input[0]){
                 case "Print":
                     subInput = input[1].split("\\,");
@@ -31,8 +32,15 @@ public class gatorTaxi {
                     }
                     else{
                         // Print function for range of rideNumbers
-                        System.out.println("Multi Return called");
-                        //ArrayList<RBTNode> al =  printRideNumberWithInRange(Integer.valueOf(subInput[0]),Integer.valueOf(subInput[1]),new ArrayList<RBTNode>(),rbt.root);
+                        gatorTaxi.printCount = 0;
+                        returnCount =  printRideNumberWithInRange(Integer.valueOf(subInput[0]),Integer.valueOf(subInput[1].split("\\)")[0]),rbt.root);
+                        if(returnCount == 0){
+                            System.out.println("(0,0,0)");
+                        }
+                        else{
+                            System.out.println();
+                        }
+                        gatorTaxi.printCount = 0;
 
                     }
                 break;
@@ -98,21 +106,27 @@ public class gatorTaxi {
         return "("+rbtNode.rideNumber+","+rbtNode.rideCost+","+rbtNode.tripDuration+")";
     }
 
-    public static ArrayList<RBTNode> printRideNumberWithInRange(int min, int max, ArrayList<RBTNode> al,RBTNode rbt){
+    public static int printRideNumberWithInRange(int min, int max,RBTNode rbt){
 
-        // Check and print the ride number if it is in the range
-        if(rbt.rideNumber >= min && rbt.rideNumber <= max){
-            al.add(rbt);
+        if(rbt == RBT.externalNode){
+            return 0;
         }
-
-        // Recursively check the left and right subtree of the RBT tree
-        if(rbt.rideNumber >= min && rbt.left != RBT.externalNode){
-            printRideNumberWithInRange(min,max,al,rbt.left);
+        int count = 0;
+        if(rbt.rideNumber >= min){
+            count = count + printRideNumberWithInRange(min,max,rbt.left);
         }
-        if(rbt.rideNumber <= max && rbt.right != RBT.externalNode){
-            printRideNumberWithInRange(min,max,al,rbt.right);
+        if(min <= rbt.rideNumber && rbt.rideNumber <= max && rbt != RBT.externalNode){
+            if(gatorTaxi.printCount > 0){
+                System.out.print(",");
+            }
+            System.out.print("("+rbt.rideNumber+","+rbt.rideCost+","+rbt.tripDuration+")");
+            gatorTaxi.printCount++;
+            count++;
         }
-        return al;
+        if(rbt.rideNumber <= max){
+            count = count + printRideNumberWithInRange(min,max,rbt.right);
+        }
+        return count;
     }
 
     public static String getNextRide(MinHeap mHeap, RBT rbt){
@@ -157,7 +171,17 @@ public class gatorTaxi {
             */
             updateNode.tripDuration = modifiedTripDuration;
             updateNode.heapNode.tripDuration = modifiedTripDuration;
-            mHeap.heapify(updateNode.heapNode.index);
+
+            // Now check if the minHeap property is violated and heapify the minHeap either in the upward or downward direction
+
+            // If the updateNode ride cost is greater than the parent node ride cost or if the ride cost is equal and the trip duration is less than the parent node trip duration then heapify up
+            if(updateNode.rideCost < mHeap.getParentNode(updateNode.heapNode.index).rideCost || ((updateNode.rideCost == mHeap.getParentNode(updateNode.heapNode.index).rideCost && updateNode.tripDuration < mHeap.getParentNode(updateNode.heapNode.index).tripDuration))){
+                mHeap.heapifyUp(updateNode.heapNode.index);
+            }
+            // Or else heapify down if necessary
+            else{
+                mHeap.heapifyDown(updateNode.heapNode.index);
+            }
             return;
         }
         else if((updateNode.tripDuration < modifiedTripDuration) && modifiedTripDuration <= 2*(updateNode.tripDuration)){

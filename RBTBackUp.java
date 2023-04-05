@@ -443,5 +443,45 @@ class RBT {
         r.delete(20);
         prettyPrint(r.root);
    }
+
+    // Method to heapify the heap in downward direction
+    // public void heapify(int index){
+        
+    //     // If the node is a leaf node, we cannot heapify it further in downward direction
+    //     if(!isNodeALeaf(index)){
+    //         int swapIndex = index;
+        
+    //         // Get the index of the node with the minimum value among the node and its children, and swap the node with that node.
+    //         // Tie breaker: If nodes have same rideCost, use node with minimum tripDuration.
+    //         if(hasRightChild(index)){
+    //             swapIndex = getLeftChildNode(index).rideCost < getRightChildNode(index).rideCost ? getLeftChildIndex(index) : (getLeftChildNode(index).rideCost == getRightChildNode(index).rideCost && getLeftChildNode(index).tripDuration < getRightChildNode(index).tripDuration ? getLeftChildIndex(index) : getRightChildIndex(index));
+    //         }
+    //         else{
+    //             swapIndex = getLeftChildIndex(index);
+    //         }
+
+    //         if((minHeap[index].rideCost > getLeftChildNode(index).rideCost) || (minHeap[index].rideCost > getRightChildNode(index).rideCost)){
+    //             swapNodes(index, swapIndex);
+    //             heapify(swapIndex);
+    //         }
+    //         else if(hasRightChild(index)){
+    //             minHeapNode left = getLeftChildNode(index);
+    //             minHeapNode right = getRightChildNode(index);
+
+    //             if((minHeap[index].rideCost == left.rideCost && minHeap[index].tripDuration > left.tripDuration) || (minHeap[index].rideCost == right.rideCost && minHeap[index].tripDuration > right.tripDuration)){
+    //                 swapIndex = (minHeap[index].rideCost == left.rideCost && minHeap[index].tripDuration > left.tripDuration) ? getLeftChildIndex(index) : getRightChildIndex(index);
+    //                 swapNodes(index, swapIndex);
+    //                 heapify(swapIndex);
+    //             }
+    //         }
+    //         else if(hasLeftChild(index)){
+    //             minHeapNode left = getLeftChildNode(index);
+    //             if(minHeap[index].rideCost == left.rideCost && minHeap[index].tripDuration > left.tripDuration){
+    //                 swapIndex = getLeftChildIndex(index);
+    //                 heapify(swapIndex);
+    //             }
+    //         }
+    //     }
+    // }
     
 }

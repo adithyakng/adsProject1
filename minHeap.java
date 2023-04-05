@@ -1,9 +1,14 @@
 class minHeapNode{
 
+    // Class to store the node details of the min heap
     int rideNumber;
     int rideCost;
     int tripDuration;
+
+    // Index of the node in the min heap
     int index;
+
+    // Pointer to the corresponding node in the RBT tree
     RBTNode rbtPointer;
 
 
@@ -11,9 +16,12 @@ class minHeapNode{
         this.rideNumber = rideNumber;
         this.rideCost = rideCost;
         this.tripDuration = tripDuration;
+
+        // Initially the rbtPointer is null, as a link is not established with the RBT tree
         rbtPointer = null;
     }
 
+    // Overriding the toString method to print the node details
     public String toString(){
         return index+" "+rideNumber+" "+rideCost+" "+tripDuration;
     }
@@ -21,6 +29,7 @@ class minHeapNode{
 }
 
 
+// MinHeap class which implements the min heap data structure
 public class MinHeap{
 
 
@@ -30,21 +39,26 @@ public class MinHeap{
     MinHeap(){
         // Maximum size of the heap can be atmost 2000 as per the question
         minHeap = new minHeapNode[2001];
+        // Initially the size of the heap is 0
         size = 0;
     }
 
+    // Method to get the parent node of the node at the given index
     public minHeapNode getParentNode(int index){
         return minHeap[getParentIndex(index)];
     }
 
+    // Method to get the left child node of the node at the given index
     public minHeapNode getLeftChildNode(int index){
         return minHeap[getLeftChildIndex(index)];
     }
 
+    // Method to get the right child node of the node at the given index
     public minHeapNode getRightChildNode(int index){
         return minHeap[getRightChildIndex(index)];
     }
 
+    // Method to get the parent index of the node at the given index
     public int getParentIndex(int index){
         if(index == 0){
             return 0;
@@ -52,36 +66,46 @@ public class MinHeap{
         return (index % 2) == 0 ? (index - 2)/2 : (index - 1)/2;
     }
 
+    // Method to get the left child index of the node at the given index
     public int getLeftChildIndex(int index){
         return (2*index)+1;
     }
 
+    // Method to get the right child index of the node at the given index
     public int getRightChildIndex(int index){
         return (2*index)+2;
     }
 
+    // Method to check if a node is a leaf node
     public boolean isNodeALeaf(int index){
 
+        // If the node is a leaf node, then it will not have leftChild and rightChild
         if(!hasLeftChild(index) && !hasRightChild(index)){
             return true;
         }
         return false;
     }
 
+    // Method to check if a node has a left child
     public boolean hasLeftChild(int index){
+        // If the left child index is within the size of the heap, then the node has a left child
         if(getLeftChildIndex(index) < size){
             return true;
         }
         return false;
     }
 
+    // Method to check if a node has right child
     public boolean hasRightChild(int index){
+
+        // If the right child index is within the size of the heap, then the node has a right child
         if(getRightChildIndex(index) < size){
             return true;
         }
         return false;
     }
 
+    // Utility function to swap two nodes, given their indices
     public void swapNodes(int node1, int node2){
         minHeapNode temp = minHeap[node1];
         minHeap[node1] = minHeap[node2];
@@ -90,51 +114,64 @@ public class MinHeap{
         minHeap[node2].index = node2;
     }
 
+    // Method to insert a new node into the min heap
     public void insert(minHeapNode newNode){
 
-        //minHeapNode newNode = new minHeapNode(rideNumber, rideCost, tripDuration);
+        // Insert the new node at the end of the heap
         minHeap[size] = newNode;
         newNode.index = size;
         int currentIndex = size;
-        while((minHeap[currentIndex].rideCost < getParentNode(currentIndex).rideCost) || (minHeap[currentIndex].rideCost == getParentNode(currentIndex).rideCost && minHeap[currentIndex].tripDuration < getParentNode(currentIndex).tripDuration) ){
+
+        // Increment the size of the heap by 1
+        size = size + 1;
+        
+        // Once a new node is inserted, the heap property may be violated, so heapify the heap in upward direction
+        heapifyUp(currentIndex);
+    }
+
+
+    void heapifyUp(int currentIndex){
+        /* 
+         * Check the heap property for the current node and its parent node and swap 
+         * if necessary until the heap property is satisfied or we reach the root node
+        */ 
+        while((minHeap[currentIndex].rideCost < getParentNode(currentIndex).rideCost) || (minHeap[currentIndex].rideCost == getParentNode(currentIndex).rideCost && minHeap[currentIndex].tripDuration < getParentNode(currentIndex).tripDuration)){
             swapNodes(currentIndex, getParentIndex(currentIndex));
             currentIndex = getParentIndex(currentIndex);
         }
-        size = size + 1;
     }
 
-    public void heapify(int index){
-        
-        if(!isNodeALeaf(index)){
-            int swapIndex = index;
-        
+    void heapifyDown(int index){
+        /*
+         * Check the heap property for the current node and its child nodes and swap if necessary until we reach a leaf node
+         */
+        int beforeSwapIndex;
+        while(!isNodeALeaf(index)){
+            minHeapNode left = getLeftChildNode(index);
+            minHeapNode minimum = left;
+            minHeapNode right;
             if(hasRightChild(index)){
-                swapIndex = getLeftChildNode(index).rideCost < getRightChildNode(index).rideCost ? getLeftChildIndex(index) : (getLeftChildNode(index).rideCost == getRightChildNode(index).rideCost && getLeftChildNode(index).tripDuration < getRightChildNode(index).tripDuration ? getLeftChildIndex(index) : getRightChildIndex(index));
+                right = getRightChildNode(index);
+                if(right.rideCost < left.rideCost){
+                    minimum = right;
+                }
+                else if(right.rideCost == left.rideCost && right.tripDuration < left.tripDuration){
+                    minimum = right;
+                }
+            }
+            if(minHeap[index].rideCost > minimum.rideCost){
+                beforeSwapIndex = minimum.index;
+                swapNodes(index, minimum.index);
+                index = beforeSwapIndex;
+            }
+            // If the ride cost is same, then compare the trip duration and the one with lower trip duration is given priority
+            else if(minHeap[index].rideCost == minimum.rideCost && minHeap[index].tripDuration > minimum.tripDuration){
+                beforeSwapIndex = minimum.index;
+                swapNodes(index, minimum.index);
+                index = beforeSwapIndex;
             }
             else{
-                swapIndex = getLeftChildIndex(index);
-            }
-
-            if((minHeap[index].rideCost > getLeftChildNode(index).rideCost) || (minHeap[index].rideCost > getRightChildNode(index).rideCost)){
-                swapNodes(index, swapIndex);
-                heapify(swapIndex);
-            }
-            else if(hasRightChild(index)){
-                minHeapNode left = getLeftChildNode(index);
-                minHeapNode right = getRightChildNode(index);
-
-                if((minHeap[index].rideCost == left.rideCost && minHeap[index].tripDuration > left.tripDuration) || (minHeap[index].rideCost == right.rideCost && minHeap[index].tripDuration > right.tripDuration)){
-                    swapIndex = (minHeap[index].rideCost == left.rideCost && minHeap[index].tripDuration > left.tripDuration) ? getLeftChildIndex(index) : getRightChildIndex(index);
-                    swapNodes(index, swapIndex);
-                    heapify(swapIndex);
-                }
-            }
-            else if(hasLeftChild(index)){
-                minHeapNode left = getLeftChildNode(index);
-                if(minHeap[index].rideCost == left.rideCost && minHeap[index].tripDuration > left.tripDuration){
-                    swapIndex = getLeftChildIndex(index);
-                    heapify(swapIndex);
-                }
+                break;
             }
         }
     }
@@ -148,10 +185,20 @@ public class MinHeap{
     }
 
     public minHeapNode removeMin(){
+
+        // If the heap is empty, then return null
+        if(size == 0){
+            return null;
+        }
+        /*
+         * If the heap is not empty, then swap the root node with the last node in the heap and 
+         * heapify the heap in downward direction
+         */
         minHeapNode root = minHeap[0];
         minHeap[0] = minHeap[size-1];
+        minHeap[0].index = 0;
         size = size - 1;
-        heapify(0);
+        heapifyDown(0);
         return root;
     }
 
@@ -173,24 +220,45 @@ public class MinHeap{
         // Change the rbt pointer also
         lastNode.rbtPointer.heapNode = node;
         size = size - 1;
-        heapify(node.index);
+
+        // Now depending on the value of the node, either heapify up or heapify down
+        if(node.rideCost < getParentNode(node.index).rideCost || (node.rideCost == getParentNode(node.index).rideCost && node.tripDuration < getParentNode(node.index).tripDuration)){
+            heapifyUp(node.index);
+        }
+        else
+        {
+            heapifyDown(node.index);
+        }
     }
 
     // Remove this function adithya
 
     // public static void main(String[] args) {
     //         MinHeap m = new MinHeap();
-    //         m.insert(5, 4, 2);
-    //         m.insert(6, 4, 3);
-    //         m.insert(7, 4, 1);
-    //         m.insert(8, 1, 3);
-    //         m.insert(10, 1, 10);
+    //         m.insert(new minHeapNode(5, 4, 4));
+    //         m.insert(new minHeapNode(6, 4, 1));
+    //         m.insert(new minHeapNode(7, 4,3));
+    //         m.insert(new minHeapNode(8, 4, 5));
+    //         minHeapNode m1 = new minHeapNode(10, 4, 2);
+    //         m.insert(m1);
+    //         m.insert(new minHeapNode(15, 4, 14));
+    //         m.insert(new minHeapNode(16, 4, 13));
+    //         m.insert(new minHeapNode(17, 4,32));
+    //         m.insert(new minHeapNode(18, 4, 15));
+    //         m.insert(new minHeapNode(110, 4, 12));
+
     //         m.print();
-    //         System.out.println();
-    //         while(m.size !=0)
-    //         {
-    //             System.out.println(m.removeMin());
-    //         }
+    //         System.out.println("---------------");
+    //         m.removeNode(m1);
+    //         m.print();
+    //         // while(m.size !=0)
+    //         // while(m.size !=0)
+    //         // {
+    //         //     System.out.println(m.removeMin());
+    //         //     System.out.println("-----------------");
+    //         //     m.print();
+    //         //     System.out.println("-----------------");
+    //         // }
     // }
 
 }
