@@ -1,96 +1,128 @@
 class RBT {
 
     RBTNode root = null;
+
+	// External node is a node that is not a part of the tree
     static RBTNode externalNode = null;
 
+	// constructor which creates an external node and also points the root to the external node
     RBT(){
       if(externalNode == null){
         externalNode = new RBTNode();
         root = externalNode;
       }
     }
+
+	/*
+	 * Method to insert newNode into RBT tree
+	*/
     public void insert(RBTNode newNode){
 
+		//Start from the root node and traverse the tree
         RBTNode currentNode = root;
         RBTNode currentParent = null;
 
+		// Traverse the tree until you reach the external node
         while(currentNode != externalNode){
             currentParent = currentNode;
+			// If the newNode has a rideNumber less than the currentNode, then traverse the left subtree
             if(currentNode.rideNumber > newNode.rideNumber){
                 currentNode = currentNode.left;
             }
+			// If the newNode has a rideNumber greater than the currentNode, then traverse the right subtree
             else if(currentNode.rideNumber < newNode.rideNumber){
                 currentNode = currentNode.right;
             }
         }
+		// If the currentParent is null, it means that the tree is empty and the newNode is the first node to be inserted
         if(currentParent == null){
-            // This is the first node that is being inserted so point it to the root
+			// Make the newNode as the root node
             root = newNode;
-            // NewNode parent change it to null
+			// Make the colour of the root node as black
             root.colour = RBTNode.black;
             return;
         }
+		// If the newNode has a rideNumber less than the currentParent, then make the newNode as the left child of the currentParent
         else if(currentParent.rideNumber > newNode.rideNumber){
             currentParent.left = newNode;
         }
+		// If the newNode has a rideNumber greater than the currentParent, then make the newNode as the right child of the currentParent
         else{
             currentParent.right = newNode;
         }
-
+		// Change the parent of the newNode to the currentParent
         newNode.parent = currentParent;
+		// If the currentParent is the root node, then no changes are required to the tree
         if(newNode.parent.parent == null){
             return;
         }
-        fixRBTreeInsert(newNode);
+
+        restoreRbtOnInsert(newNode);
 
     }
 
-    public void fixRBTreeInsert(RBTNode node){
+	/*
+	 * Method to restore the RBT properties after insertion.
+	 * Get the parent, grandparent and uncle of the node and check if the uncle is red or black
+	 * X = relationship between parent and grandparent, Y = relationship between node and parent, Z = uncle
+	 * if XYr, then change the colour of Y and Z to black and colour of X to red and move up two levels
+	 * XYZ = LLb, then rotate right at Y and change the colour of Y to black and X & Z to red.(RRb is symmetric)
+	 * XYZ = LRb, then rotate left at X and then rotate right at Y and change the colour of Y to black and X & Z to red.(RLb is symmetric)
+	 */
+    public void restoreRbtOnInsert(RBTNode node){
 
         RBTNode parent = node.parent;
         RBTNode grandfather = parent.parent;
         RBTNode uncle;
 
+		// If the parent of newly inserted node is black, then no changes are required to the tree else we need to restore the RBT properties
         while(node.parent.colour == RBTNode.red){
             parent = node.parent;
             grandfather = (parent.parent != null) ? parent.parent : null;
+
+			// Get the uncle of the node
             uncle = getUncleNode(parent);
 
             if(grandfather.right == parent){
-              if(uncle!=null && uncle.colour == RBTNode.red){
-                uncle.colour = RBTNode.black;
-                grandfather.colour = RBTNode.red;
-                parent.colour = RBTNode.black;
-                node = grandfather;
-              }
-              else{
-                if(node == parent.left){
-                  node = parent;
-                  rotateRight(node);
-                }
-                node.parent.colour = RBTNode.black;
-                node.parent.parent.colour = RBTNode.red;
-                rotateLeft(node.parent.parent);
-              }
+				// RYr case. Change the colour of parent and uncle to black, colour grandparent to red and move up two levels
+				if(uncle!=null && uncle.colour == RBTNode.red){
+					uncle.colour = RBTNode.black;
+					grandfather.colour = RBTNode.red;
+					parent.colour = RBTNode.black;
+					node = grandfather;
+				}
+				// RLb and RRb cases
+				else{
+					if(node == parent.left){
+					node = parent;
+					rotateRight(node);
+					}
+					node.parent.colour = RBTNode.black;
+					node.parent.parent.colour = RBTNode.red;
+					rotateLeft(node.parent.parent);
+				}
             }
             else{
-              if(uncle!=null && uncle.colour ==  RBTNode.red){
-                uncle.colour = RBTNode.black;
-                grandfather.colour = RBTNode.red;
-                parent.colour = RBTNode.black;
-                node = grandfather;
-              }
-              else{
-                  if(node == parent.right){
-                    node = parent;
-                    rotateLeft(node);
-                  }
-                  node.parent.colour = RBTNode.black;
-                  node.parent.parent.colour = RBTNode.red;
-                  rotateRight(node.parent.parent);
-              }
+				// LYr case. Change the colour of parent and uncle to black, colour grandparent to red and move up two levels
+				if(uncle!=null && uncle.colour ==  RBTNode.red){
+					uncle.colour = RBTNode.black;
+					grandfather.colour = RBTNode.red;
+					parent.colour = RBTNode.black;
+					node = grandfather;
+				}
+				else{
+					// LLb and LRb cases
+					if(node == parent.right){
+						node = parent;
+						rotateLeft(node);
+					}
+					node.parent.colour = RBTNode.black;
+					node.parent.parent.colour = RBTNode.red;
+					rotateRight(node.parent.parent);
+				}
             }
 
+			// If the node is the root node, then change the colour of the root node to black and break the loop
             if(node == root){
               root.colour = RBTNode.black;
               break;
@@ -98,50 +130,85 @@ class RBT {
         }
     }
 
+	/*
+	 * Method to rotate the node of the tree to the right
+	 */
     public void rotateRight(RBTNode node) {
+		// Get the left child of the node and make it as the right child of the parent node
      	RBTNode leftChildNode = node.left;
 		node.left = leftChildNode.right;
+
+		// If the leftChoiceNode has a right child, then change the parent of the right child to the node
 		if (leftChildNode.right != RBT.externalNode) {
 			leftChildNode.right.parent = node;
 		}
+		// Change the parent of the leftChildNode to the parent of the node
 		leftChildNode.parent = node.parent;
+
+		// If the parent of the node is null, then make the leftChildNode as the root node
 		if (node.parent == null) {
 			root = leftChildNode;
-		} else if (node == node.parent.right) {
+		} 
+		// If the node is the right child of the parent, then make the leftChildNode as the right child of the parent
+		else if (node == node.parent.right) {
 			node.parent.right = leftChildNode;
-		} else {
+		} 
+		// If the node is the left child of the parent, then make the leftChildNode as the left child of the parent
+		else {
 			node.parent.left = leftChildNode;
 		}
+		// Make the node as the right child of the leftChildNode
 		leftChildNode.right = node;
+		// Change the parent of the node to the leftChildNode
 		node.parent = leftChildNode;
     }
 
+	/*
+	 * Method to rotate the node of the tree to the left
+	*/
     public void rotateLeft(RBTNode node) {
+		// Get the right child of the node and make it as the left child of the parent node
 		RBTNode rightChildNode = node.right;
 		node.right = rightChildNode.left;
+
+		// If the rightChildNode has a left child, then change the parent of the left child to the node
 		if (rightChildNode.left != RBT.externalNode) {
 			rightChildNode.left.parent = node;
 		}
+		// Change the parent of the rightChildNode to the parent of the node
 		rightChildNode.parent = node.parent;
+
+		// If the parent of the node is null, then make the rightChildNode as the root node
 		if (node.parent == null) {
 			root = rightChildNode;
-		} else if (node == node.parent.left) {
+		} 
+		// If the node is the left child of the parent, then make the rightChildNode as the left child of the parent
+		else if (node == node.parent.left) {
 			node.parent.left = rightChildNode;
-		} else {
+		} 
+		// If the node is the right child of the parent, then make the rightChildNode as the right child of the parent
+		else {
 			node.parent.right = rightChildNode;
 		}
+		// Make the node as the left child of the rightChildNode
 		rightChildNode.left = node;
+		// Change the parent of the node to the rightChildNode
 		node.parent = rightChildNode;
     }
 
 
-    public RBTNode getUncleNode(RBTNode node){
+	/*
+	 * Method to get the uncle node of a given node
+	 */
+    public RBTNode getUncleNode(RBTNode parent){
         
-        if(node.parent.left == node){
-            return node.parent.right;
+		// If the given parent node is left child of it's parent, then return the right child of the given parent node
+        if(parent.parent.left == parent){
+            return parent.parent.right;
         }
-        else if(node.parent.right == node){
-            return node.parent.left;
+		// If the given parent node is right child of it's parent, then return the left child of the given parent node
+        else if(parent.parent.right == parent){
+            return parent.parent.left;
         }
         return null;
     }
@@ -165,8 +232,14 @@ class RBT {
       }
     }
 
+	/*
+	 * Method to get the in-order successor of a given node
+	 * In-order successor is the lowest element in the right subtree of the given node
+	 */
     public RBTNode inOrderSuccessor(RBTNode node){
-      
+		// First go to the right child of the given node
+		node = node.right;
+		// Then go to the left child until the left child is an external node
         while(node.left != RBT.externalNode){
           node = node.left;
         }
@@ -177,18 +250,32 @@ class RBT {
       printHelper(root, "", true);
     }
 
+	/*
+	 * Method to delete a node from the RBTree
+	 * The node to be deleted is first determined by the rideNumber
+	 * If the node h
+	 */
     public void deleteRBTNode(int rideNumber){
        
 		RBTNode deleteNode = RBT.externalNode;
+
+		// Start from the root node
 		RBTNode currentNode = root;
+
+		// Find the node to be deleted
 		while (currentNode != RBT.externalNode){
+			// If the rideNumber of the current node is equal to the rideNumber to be deleted, 
+			// then mark the current node as the node to be deleted
 			if (currentNode.rideNumber == rideNumber) {
 				deleteNode = currentNode;
 			}
-
+			// If the rideNumber of the current node is less than the rideNumber to be deleted,
+			// then go to the right child of the current node
 			if (currentNode.rideNumber < rideNumber) {
 				currentNode = currentNode.right;
 			} 
+			// If the rideNumber of the current node is greater than the rideNumber to be deleted,
+			// then go to the left child of the current node
 			else {
 				currentNode = currentNode.left;
 			}
@@ -199,9 +286,10 @@ class RBT {
 			return;
 		} 
 		
+		// Get the colour of the node to be deleted
 		int deleteNodeColour = deleteNode.colour;
       	RBTNode replacementNode;
-		// if no left child
+		// If there is no left child then replace the node with the right child
 		if (deleteNode.left == RBT.externalNode) {
 			replacementNode = deleteNode.right;
 			if (deleteNode.parent == null) {
@@ -215,7 +303,7 @@ class RBT {
 			}
 			deleteNode.right.parent = deleteNode.parent;
 		} 
-		// If no right child
+		// If there is no right child then replace the node with the left child
 		else if (deleteNode.right == RBT.externalNode) {
 			replacementNode = deleteNode.left;
 			if (deleteNode.parent == null) {
@@ -229,9 +317,11 @@ class RBT {
 			}
 			deleteNode.left.parent = deleteNode.parent;
 		} 
-		// If deleteNode is an internal Node
+		/* If there are both left and right child, then replace the node with the in-order successor and 
+		* delete the in-order successor
+		*/
 		else {
-			RBTNode inOrderSuccessor = inOrderSuccessor(deleteNode.right);
+			RBTNode inOrderSuccessor = inOrderSuccessor(deleteNode);
 			deleteNodeColour = inOrderSuccessor.colour;
 			replacementNode = inOrderSuccessor.right;
 			if (inOrderSuccessor.parent == deleteNode) {
@@ -264,38 +354,56 @@ class RBT {
 			inOrderSuccessor.left.parent = inOrderSuccessor;
 			inOrderSuccessor.colour = deleteNode.colour;
 		}
+	// If the node to be deleted is black, then RBT properties might be violated, so restore the properties
       if (deleteNodeColour == RBTNode.black){
-        fixRBTreeDelete(replacementNode);
+        restoreRbtOnDelete(replacementNode);
       }
     }
 
-    public void fixRBTreeDelete(RBTNode fNode){
+	/*
+	 * Method to restore the RBT properties after a node is deleted, 
+	 * the node which violates the RBT properties is passed as a parameter
+	 */
+    public void restoreRbtOnDelete(RBTNode fNode){
+		
+		// Get the sibling of the node which violates the RBT properties
 		RBTNode siblingNode;
-		while (fNode.colour != RBTNode.red && fNode != root) {
+
+		/*
+		While the node which violates the RBT properties is not the root and is black we continue to restore the properties 
+		*/ 
+		while (fNode.colour != RBTNode.red && root != fNode) {
+			// If the node which violates the RBT properties is the right child of its parent
 			if(fNode == fNode.parent.right) {
+				// siblingNode will be the left child of the parent
 				siblingNode = fNode.parent.left;
+
+				// If the sibling is red, then change the colour of the sibling and parent and rotate 
+				// the parent to the right
 				if (siblingNode.colour != RBTNode.black) {
-					// case 3.RBTNode.red
 					siblingNode.colour = RBTNode.black;
 					fNode.parent.colour = RBTNode.red;
 					rotateRight(fNode.parent);
 					siblingNode = fNode.parent.left;
 				}
 
+				// If both the children of the sibling are black, then change the colour of the sibling to red
 				if (siblingNode.right.colour != RBTNode.red && siblingNode.left.colour != RBTNode.red) {
-					// case 3.2
 					siblingNode.colour = RBTNode.red;
 					fNode = fNode.parent;
-				} else {
+				} 
+				else {
+					// If the left child of the sibling is black, then change the colour of the right child of the sibling to black
+					// and the colour of the sibling to red and rotate the sibling to the left
 					if (siblingNode.left.colour == RBTNode.black) {
-						// case 3.3
 						siblingNode.right.colour = RBTNode.black;
 						siblingNode.colour = RBTNode.red;
 						rotateLeft(siblingNode);
 						siblingNode = fNode.parent.left;
 					} 
 
-					// case 3.4
+					// Change the colour of the sibling to the colour of the parent, change the colour of the parent to black
+					// and the colour of the left child of the sibling to black and rotate the parent to the right
 					siblingNode.colour = fNode.parent.colour;
 					fNode.parent.colour = RBTNode.black;
 					siblingNode.left.colour = RBTNode.black;
@@ -304,31 +412,36 @@ class RBT {
 				}
 			}
 
-			// Mirror cases of above code
+			// If the node which violates the RBT properties is the left child of its parent
+			// These are mirror image cases of the above cases
 			else if (fNode == fNode.parent.left) {
+				// siblingNode will be the right child of the parent
 				siblingNode = fNode.parent.right;
+
+				// If the sibling is red, then change the colour of the sibling and parent and rotate the parent to the left
 				if (siblingNode.colour != RBTNode.black) {
-					// case 3.RBTNode.red
 					siblingNode.colour = RBTNode.black;
 					fNode.parent.colour = RBTNode.red;
 					rotateLeft(fNode.parent);
 					siblingNode = fNode.parent.right;
 				}
 
+				// If both the children of the sibling are black, then change the colour of the sibling to red
 				if (siblingNode.left.colour != RBTNode.red && siblingNode.right.colour != RBTNode.red) {
-					// case 3.2
 					siblingNode.colour = RBTNode.red;
 					fNode = fNode.parent;
 				} else {
+					// If the right child of the sibling is black, then change the colour of the left child of the sibling to black
+					// and the colour of the sibling to red and rotate the sibling to the right
 					if (siblingNode.right.colour == RBTNode.black) {
-						// case 3.3
 						siblingNode.left.colour = RBTNode.black;
 						siblingNode.colour = RBTNode.red;
 						rotateRight(siblingNode);
 						siblingNode = fNode.parent.right;
-					} 
+					}
 
-					// case 3.4
+					// Change the colour of the sibling to the colour of the parent, change the colour of the parent to black
+					// and the colour of the right child of the sibling to black and rotate the parent to the left
 					siblingNode.colour = fNode.parent.colour;
 					fNode.parent.colour = RBTNode.black;
 					siblingNode.right.colour = RBTNode.black;
@@ -340,50 +453,61 @@ class RBT {
 		fNode.colour = RBTNode.black;
     }
 
+	/*
+	 * Method to check if a node with the given ride number exists in the RBT
+	 * Returns true if the node exists, false otherwise
+	 */
     public boolean checkRideNumber(int rideNumber){
+	
+	  // Start from the root node
       RBTNode currentNode = root;
+	  // While the current node is not the external node
       while(currentNode != RBT.externalNode){
+
+		// If the ride number of the current node is equal to the required ride number, return true
         if(rideNumber == currentNode.rideNumber){
           return true;
         }
+		// If the ride number of the current node is greater than the required ride number, move to the left child
         else if(rideNumber < currentNode.rideNumber){
           currentNode = currentNode.left;
         }
+		// If the ride number of the current node is less than the required ride number, move to the right child
         else{
           currentNode = currentNode.right;
         }
       }
+	  // If the ride number is not found, return false
       return false;
     }
 
+
+
+	/*
+	 * Method to get the node with the given ride number
+	 * Returns the node if it exists, null otherwise
+	 */
     public RBTNode getNodeFromRideNumber(int rideNumber){
+	// Start from the root node
       RBTNode currentNode = root;
+	  // While the current node is not the external node
       while(currentNode != RBT.externalNode){
+		// If the ride number of the current node is equal to the required ride number, return the current node
         if(rideNumber == currentNode.rideNumber){
           return currentNode;
         }
+		// If the ride number of the current node is greater than the required ride number, move to the left child
         else if(rideNumber < currentNode.rideNumber){
           currentNode = currentNode.left;
         }
+		// If the ride number of the current node is less than the required ride number, move to the right child
         else{
           currentNode = currentNode.right;
         }
       }
+	  // If the ride number is not found, return null
       return null;
     }
 
-    public static void main(String args[]){
-        RBT r = new RBT();
-
-        // r.insert(10, 1, 2);
-        // r.insert(20,2,3);
-        // r.insert(15,5,3);
-        // r.insert(2,1,3);
-        // r.insert(25,14,13);
-        // r.insert(13,5,12);
-
-        r.deleteRBTNode(20);
-        prettyPrint(r.root);
-   }
     
 }

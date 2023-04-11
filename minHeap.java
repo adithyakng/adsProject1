@@ -99,7 +99,7 @@ public class MinHeap{
     }
 
 
-    void heapifyUp(int currentIndex){
+    public void heapifyUp(int currentIndex){
         /* 
          * Check the heap property for the current node and its parent node and swap 
          * if necessary until the heap property is satisfied or we reach the root node
@@ -110,7 +110,7 @@ public class MinHeap{
         }
     }
 
-    void heapifyDown(int index){
+    public void heapifyDown(int index){
         /*
          * Check the heap property for the current node and its child nodes and swap if necessary until we reach a leaf node
          */
@@ -176,6 +176,12 @@ public class MinHeap{
         // If the node is the last node in the heap then just remove it
         if(size == 1){
             size = size - 1;
+            return;
+        }
+
+        // If the index of the node is 0, then remove the min node and return
+        if(node.index == 0){
+            removeMin();
             return;
         }
 

@@ -11,7 +11,9 @@ public class gatorTaxi {
 
         // Read the input file
         File inputFile = new File(args[0]);
+        File outputFile = new File("output_file.txt");
         BufferedReader inputReader = new BufferedReader(new InputStreamReader( new FileInputStream(inputFile)));
+        FileWriter outputWriter = new FileWriter(outputFile);
         String inputLine;
 
         // Read the input file line by line until the end of the file
@@ -31,21 +33,29 @@ public class gatorTaxi {
                     if(subInput.length == 1){
                         // Print function for single ride number
                         int rideNumber = Integer.valueOf(subInput[0].split("\\)")[0]);
-                        System.out.println(printRideNumber(rideNumber,rbt));
-
+                        //System.out.println(printRideNumber(rideNumber,rbt));
+                        outputWriter.write(printRideNumber(rideNumber,rbt)+"\n");
+                        outputWriter.flush();
+                        
                     }
                     else{
                         // Print function for range of rideNumbers
                         gatorTaxi.printCount = 0;
-                        returnCount =  printRideNumberWithInRange(Integer.valueOf(subInput[0]),Integer.valueOf(subInput[1].split("\\)")[0]),rbt.root);
+                        returnCount =  printRideNumberWithInRange(Integer.valueOf(subInput[0]),Integer.valueOf(subInput[1].split("\\)")[0]),rbt.root,outputWriter);
 
                         // If there are no rideNumbers in the range print (0,0,0)
                         if(returnCount == 0){
-                            System.out.println("(0,0,0)");
+                            //System.out.println("(0,0,0)");
+                            outputWriter.write("(0,0,0)"+"\n");
+                            outputWriter.flush();
+                            
                         }
                         // if there are rideNumbers in the range then returnCount will be >=0 and we need to print a new line after the output
                         else{
-                            System.out.println();
+                            //System.out.println();
+                            outputWriter.write("\n");
+                            outputWriter.flush();
+                            
                         }
                         // Update the printCount to 0 for the next print function
                         gatorTaxi.printCount = 0;
@@ -60,7 +70,9 @@ public class gatorTaxi {
 
                     // If the rideNumber is already present in the RBT tree then print Duplicate RideNumber and quit
                     if(!insertSuccess){
-                        System.out.println("Duplicate RideNumber");
+                        //System.out.println("Duplicate RideNumber");
+                        outputWriter.write("Duplicate RideNumber"+"\n");
+                        outputWriter.flush();
                         return;
                     }
                 break;
@@ -79,7 +91,10 @@ public class gatorTaxi {
                     
                     // invoke the getNextRide function to get the next ride from the minHeap and print it
                     nextRideReturn = getNextRide(mHeap, rbt);
-                    System.out.println(nextRideReturn);
+                    //System.out.println(nextRideReturn);
+                    outputWriter.write(nextRideReturn+"\n");
+                    outputWriter.flush();
+                    
                 break;
                 default:
                     break;
@@ -88,6 +103,9 @@ public class gatorTaxi {
 
         // Close the input file reader
         inputReader.close();
+        // Close the output file writer
+        outputWriter.flush();
+        outputWriter.close();
         
     }
 
@@ -145,7 +163,7 @@ public class gatorTaxi {
      * If the root rideNumber is greater than min then recursively traverse the left subtree.
      * If the root rideNumber is less than max then recursively traverse the right subtree.
      */
-    public static int printRideNumberWithInRange(int min, int max,RBTNode rbt){
+    public static int printRideNumberWithInRange(int min, int max,RBTNode rbt, FileWriter outputWriter) throws IOException{
 
         // Base case
         if(rbt == RBT.externalNode){
@@ -155,21 +173,26 @@ public class gatorTaxi {
 
         // If the root rideNumber is greater than min then recursively traverse the left subtree.
         if(rbt.rideNumber >= min){
-            count = count + printRideNumberWithInRange(min,max,rbt.left);
+            count = count + printRideNumberWithInRange(min,max,rbt.left, outputWriter);
         }
 
         // If the rideNumber is in the range of min and max then print the rideNumber, rideCost and tripDuration and increase count
         if(min <= rbt.rideNumber && rbt.rideNumber <= max && rbt != RBT.externalNode){
             if(gatorTaxi.printCount > 0){
-                System.out.print(",");
+                //System.out.print(",");
+                outputWriter.write(",");
+                outputWriter.flush();
+                
             }
-            System.out.print("("+rbt.rideNumber+","+rbt.rideCost+","+rbt.tripDuration+")");
+            //System.out.print("("+rbt.rideNumber+","+rbt.rideCost+","+rbt.tripDuration+")");
+            outputWriter.write("("+rbt.rideNumber+","+rbt.rideCost+","+rbt.tripDuration+")");
+            outputWriter.flush();
             gatorTaxi.printCount++;
             count++;
         }
         // If the root rideNumber is less than max then recursively traverse the right subtree.
         if(rbt.rideNumber <= max){
-            count = count + printRideNumberWithInRange(min,max,rbt.right);
+            count = count + printRideNumberWithInRange(min,max,rbt.right, outputWriter);
         }
         return count;
     }
@@ -250,7 +273,6 @@ public class gatorTaxi {
         else if((updateNode.tripDuration < modifiedTripDuration) && modifiedTripDuration <= 2*(updateNode.tripDuration)){
             /* IF the existing trip duration is less than the new modifiedTripDuration and the 
                 modifiedTripDuration is less than or equal to 2 times the existing trip duration
-                then update the trip duration and heapify the minHeap
              *  Then cancel the ride and create a new ride with cost penalty of 10
              */
             int modifiedRideCost = updateNode.rideCost + 10;
