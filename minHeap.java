@@ -6,8 +6,8 @@ public class MinHeap{
     int size;
 
     MinHeap(){
-        // Maximum size of the heap can be atmost 100 as per the question
-        minHeap = new minHeapNode[102];
+        // Maximum size of the heap can be atmost 2000 as per the question
+        minHeap = new minHeapNode[2000];
         // Initially the size of the heap is 0
         size = 0;
     }
