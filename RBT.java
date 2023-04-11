@@ -213,25 +213,6 @@ class RBT {
         return null;
     }
 
-    public static void printHelper(RBTNode root, String indent, boolean last) {
-      // print the tree structure on the screen
-         if (root != null) {
-         System.out.print(indent);
-         if (last) {
-            System.out.print("R----");
-            indent += "     ";
-         } else {
-            System.out.print("L----");
-            indent += "|    ";
-         }
-              
-             String sColor = root.colour == 0?"RED":"BLACK";
-         System.out.println(root.rideNumber + "(" + sColor + ")");
-         printHelper(root.left, indent, false);
-         printHelper(root.right, indent, true);
-      }
-    }
-
 	/*
 	 * Method to get the in-order successor of a given node
 	 * In-order successor is the lowest element in the right subtree of the given node
@@ -244,10 +225,6 @@ class RBT {
           node = node.left;
         }
         return node;
-    }
-
-    public static void prettyPrint(RBTNode root) {
-      printHelper(root, "", true);
     }
 
 	/*
@@ -354,10 +331,10 @@ class RBT {
 			inOrderSuccessor.left.parent = inOrderSuccessor;
 			inOrderSuccessor.colour = deleteNode.colour;
 		}
-	// If the node to be deleted is black, then RBT properties might be violated, so restore the properties
-      if (deleteNodeColour == RBTNode.black){
-        restoreRbtOnDelete(replacementNode);
-      }
+		// If the node to be deleted is black, then RBT properties might be violated, so restore the properties
+		if (deleteNodeColour == RBTNode.black){
+			restoreRbtOnDelete(replacementNode);
+		}
     }
 
 	/*
@@ -459,26 +436,26 @@ class RBT {
 	 */
     public boolean checkRideNumber(int rideNumber){
 	
-	  // Start from the root node
-      RBTNode currentNode = root;
-	  // While the current node is not the external node
-      while(currentNode != RBT.externalNode){
+		// Start from the root node
+		RBTNode currentNode = root;
+		// While the current node is not the external node
+		while(currentNode != RBT.externalNode){
 
-		// If the ride number of the current node is equal to the required ride number, return true
-        if(rideNumber == currentNode.rideNumber){
-          return true;
-        }
-		// If the ride number of the current node is greater than the required ride number, move to the left child
-        else if(rideNumber < currentNode.rideNumber){
-          currentNode = currentNode.left;
-        }
-		// If the ride number of the current node is less than the required ride number, move to the right child
-        else{
-          currentNode = currentNode.right;
-        }
-      }
-	  // If the ride number is not found, return false
-      return false;
+			// If the ride number of the current node is equal to the required ride number, return true
+			if(rideNumber == currentNode.rideNumber){
+				return true;
+			}
+			// If the ride number of the current node is greater than the required ride number, move to the left child
+			else if(rideNumber < currentNode.rideNumber){
+				currentNode = currentNode.left;
+			}
+			// If the ride number of the current node is less than the required ride number, move to the right child
+			else{
+				currentNode = currentNode.right;
+			}
+		}
+		// If the ride number is not found, return false
+		return false;
     }
 
 
@@ -488,25 +465,25 @@ class RBT {
 	 * Returns the node if it exists, null otherwise
 	 */
     public RBTNode getNodeFromRideNumber(int rideNumber){
-	// Start from the root node
-      RBTNode currentNode = root;
-	  // While the current node is not the external node
-      while(currentNode != RBT.externalNode){
-		// If the ride number of the current node is equal to the required ride number, return the current node
-        if(rideNumber == currentNode.rideNumber){
-          return currentNode;
-        }
-		// If the ride number of the current node is greater than the required ride number, move to the left child
-        else if(rideNumber < currentNode.rideNumber){
-          currentNode = currentNode.left;
-        }
-		// If the ride number of the current node is less than the required ride number, move to the right child
-        else{
-          currentNode = currentNode.right;
-        }
-      }
-	  // If the ride number is not found, return null
-      return null;
+		// Start from the root node
+		RBTNode currentNode = root;
+		// While the current node is not the external node
+		while(currentNode != RBT.externalNode){
+			// If the ride number of the current node is equal to the required ride number, return the current node
+			if(rideNumber == currentNode.rideNumber){
+				return currentNode;
+			}
+			// If the ride number of the current node is greater than the required ride number, move to the left child
+			else if(rideNumber < currentNode.rideNumber){
+				currentNode = currentNode.left;
+			}
+			// If the ride number of the current node is less than the required ride number, move to the right child
+			else{
+				currentNode = currentNode.right;
+			}
+		}
+		// If the ride number is not found, return null
+		return null;
     }
 
     
