@@ -145,14 +145,6 @@ public class MinHeap{
         }
     }
 
-    // Remove this function adithya
-
-    public void print(){
-        for(int i=0;i<size;i++){
-            System.out.println(minHeap[i]);
-        }
-    }
-
     public minHeapNode removeMin(){
 
         // If the heap is empty, then return null
@@ -205,35 +197,5 @@ public class MinHeap{
             heapifyDown(node.index);
         }
     }
-
-    // Remove this function adithya
-
-    // public static void main(String[] args) {
-    //         MinHeap m = new MinHeap();
-    //         m.insert(new minHeapNode(5, 4, 4));
-    //         m.insert(new minHeapNode(6, 4, 1));
-    //         m.insert(new minHeapNode(7, 4,3));
-    //         m.insert(new minHeapNode(8, 4, 5));
-    //         minHeapNode m1 = new minHeapNode(10, 4, 2);
-    //         m.insert(m1);
-    //         m.insert(new minHeapNode(15, 4, 14));
-    //         m.insert(new minHeapNode(16, 4, 13));
-    //         m.insert(new minHeapNode(17, 4,32));
-    //         m.insert(new minHeapNode(18, 4, 15));
-    //         m.insert(new minHeapNode(110, 4, 12));
-
-    //         m.print();
-    //         System.out.println("---------------");
-    //         m.removeNode(m1);
-    //         m.print();
-    //         // while(m.size !=0)
-    //         // while(m.size !=0)
-    //         // {
-    //         //     System.out.println(m.removeMin());
-    //         //     System.out.println("-----------------");
-    //         //     m.print();
-    //         //     System.out.println("-----------------");
-    //         // }
-    // }
 
 }
